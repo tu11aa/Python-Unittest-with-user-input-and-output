@@ -7,11 +7,11 @@ SAMPLE_QA = {
     "optional_answer": []
 }
 
-def Result(result, message = ""):
+def TestResult(result, message = ""):
     return (result, message)
 
 @mock.patch('sys.stdout', new_callable=StringIO)
-def test(func, qa, mock_stdout):
+def test_qa(func, qa, mock_stdout):
     questions = [str(question) for question in qa["questions"]]
     with mock.patch('builtins.input', side_effect=questions):
         try:
@@ -21,43 +21,26 @@ def test(func, qa, mock_stdout):
             if (qa["answer"] and len(qa["answer"]) > 0):
                 for answer in qa["answer"]:
                     if (str(answer) not in actual_answer):
-                        return Result(False)
+                        return TestResult(False, "Wrong answer.")
             else:
-                return Result(False)
+                return TestResult(False)
             #checking optional answer
             if (qa["optional_answer"]):
                 for answer in qa["optional_answer"]:
                     if (str(answer) in actual_answer):
-                        return Result(True)
+                        return TestResult(True)
             # elif 
                     
         except Exception as error:
             return (False, f'{func} has error: {error}')
                 
-        return Result(True)
+        return TestResult(True)
 
-def scoring(func, qas):
-    score = 0
-    for qa in qas:
-        if test(func, qa):
-            score += 1
+def scoring_qa(func, test_cases):
+    fail_list = []
+    for index, test_case in enumerate(test_cases["qa"]):
+        result, message = test_qa(func, test_case)
+        if not result:
+            fail_list.append({f"Test case number {index}": message})
 
-    return (score * 10) / score
-
-
-def sum():
-    a = int(input('Input first number: '))
-    b = int(input('Input first number: '))
-    print(f"{a} + {b} = {a + b}")
-    c = int(input('Input first number: '))
-    print(f"{a} + {b} = {a + b}")
-
-qa = {
-    "questions": [1, 2, 3],
-    "answer": [3],
-    "optional_answer": []
-}
-
-result, message = test(sum, qa)
-print(result)
-# sum()
+    return test_cases["score"] * (1 - (len(fail_list) / len(test_cases["qa"]))), fail_list
