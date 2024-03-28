@@ -7,6 +7,9 @@ from io_unittest import scoring_qa
 
 FUNCTION_COUNT_MAX = 8
 
+def generate_function_list(name):
+    return [f"{name}{i}" for i in range(1, FUNCTION_COUNT_MAX + 1)]
+
 submission_list = {}
 function_list = [f"Exercise_{i}" for i in range(1, FUNCTION_COUNT_MAX + 1)]
 
@@ -25,9 +28,10 @@ def scoring_submission(submission_name, submission_path):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
-    for exercise in function_list:
+    candidate_function_list = generate_function_list("exercise")
+    for index, exercise in enumerate(function_list):
         try:
-            func = getattr(module, exercise)
+            func = getattr(module, candidate_function_list[index])
             test_case_list = load_test_case_qa(exercise)
             if (len(test_case_list) > 0):
                 score, failures = scoring_qa(func, test_case_list)
@@ -35,6 +39,8 @@ def scoring_submission(submission_name, submission_path):
                 submission_list[submission_name]["failures"][exercise] = failures
         except ArithmeticError:
             print(f"Function '{exercise}' not found in the module.")
+        except AttributeError as error:
+            print(error)
 
 def save_result():
     pass
