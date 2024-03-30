@@ -4,6 +4,7 @@ import json
 import importlib.util
 from test_cases import load_test_case_qa
 from io_unittest import scoring_qa
+import argparse
 
 FUNCTION_COUNT_MAX = 8
 
@@ -39,14 +40,24 @@ def scoring_submission(submission_name, submission_path):
 def save_result():
     pass
 
+def init_argparser():
+    parser = argparse.ArgumentParser(description= "Scoring command line")
+
+    parser.add_argument("exercise_dir", default="Exercises")
+    parser.add_argument("-t", "--test_cases", default="Test cases")
+    parser.add_argument("-o", "--output", default="Result")
+
+    return parser
+
 if __name__ == "__main__":
-    dest_folder = os.path.abspath(sys.argv[1].strip('"'))
+    parser = init_argparser()
+    args = parser.parse_args()
     
-    if (not os.path.exists(dest_folder)):
-        print(f"Not found {dest_folder}")
+    if (not os.path.exists(args.exercise_dir)):
+        print(f"Not found {args.exercise_dir}")
     else:
-        print(f"Loading all submissions from {dest_folder} ...")
-        load_all_submissions(dest_folder)
+        print(f"Loading all submissions from {args.exercise_dir} ...")
+        load_all_submissions(args.exercise_dir)
 
         print("Scoring...")
         for submission_name, submission in submission_list.items():
