@@ -28,7 +28,7 @@ def scoring_submission(submission_name, submission_path):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
-    candidate_function_list = generate_function_list("exercise")
+    candidate_function_list = generate_function_list("Exercise_")
     for index, exercise in enumerate(function_list):
         try:
             func = getattr(module, candidate_function_list[index])
