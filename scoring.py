@@ -1,6 +1,5 @@
 import os
 import importlib.util
-from test_cases import load_test_case_qa
 from io_unittest import scoring_qa
 import argparse
 from SubmissionManager import SubmissionManager
@@ -14,24 +13,24 @@ def generate_function_list(name):
 submission_list = {}
 function_list = [f"Exercise_{i}" for i in range(1, FUNCTION_COUNT_MAX + 1)]
 
-def scoring_submission(submission_name, submission_path):
-    spec = importlib.util.spec_from_file_location("module", submission_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+# def scoring_submission(submission_name, submission_path):
+#     spec = importlib.util.spec_from_file_location("module", submission_path)
+#     module = importlib.util.module_from_spec(spec)
+#     spec.loader.exec_module(module)
 
-    candidate_function_list = generate_function_list("Exercise_")
-    for index, exercise in enumerate(function_list):
-        try:
-            func = getattr(module, candidate_function_list[index])
-            test_case_list = load_test_case_qa(exercise)
-            if (len(test_case_list) > 0):
-                score, failures = scoring_qa(func, test_case_list)
-                submission_list[submission_name]["score"] += score
-                submission_list[submission_name]["failures"][exercise] = failures
-        except ArithmeticError:
-            print(f"Function '{exercise}' not found in the module.")
-        except AttributeError as error:
-            print(error)
+#     candidate_function_list = generate_function_list("Exercise_")
+#     for index, exercise in enumerate(function_list):
+#         try:
+#             func = getattr(module, candidate_function_list[index])
+#             test_case_list = load_test_case_qa(exercise)
+#             if (len(test_case_list) > 0):
+#                 score, failures = scoring_qa(func, test_case_list)
+#                 submission_list[submission_name]["score"] += score
+#                 submission_list[submission_name]["failures"][exercise] = failures
+#         except ArithmeticError:
+#             print(f"Function '{exercise}' not found in the module.")
+#         except AttributeError as error:
+#             print(error)
 
 class CustomTestCase(TestCases):
     def __init__(self, custom_testcase: str = None) -> None:
