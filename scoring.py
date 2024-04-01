@@ -1,10 +1,10 @@
-import sys
 import os
-import json
 import importlib.util
 from test_cases import load_test_case_qa
 from io_unittest import scoring_qa
 import argparse
+from SubmissionManager import SubmissionManager
+from TestManager import TestManager, TestCases, TestCase
 
 FUNCTION_COUNT_MAX = 8
 
@@ -13,16 +13,6 @@ def generate_function_list(name):
 
 submission_list = {}
 function_list = [f"Exercise_{i}" for i in range(1, FUNCTION_COUNT_MAX + 1)]
-
-def load_all_submissions(submission_folder):
-    for submission in os.listdir(submission_folder):
-        if submission.endswith(".py"):
-            submission_list[submission[:-3]] = {
-                "path" : os.path.join(os.path.abspath(submission_folder), submission),
-                "failures" : {},
-                "score" : 0
-            }
-            print(f"Found {submission}.")
 
 def scoring_submission(submission_name, submission_path):
     spec = importlib.util.spec_from_file_location("module", submission_path)
@@ -43,8 +33,16 @@ def scoring_submission(submission_name, submission_path):
         except AttributeError as error:
             print(error)
 
-def save_result():
-    pass
+class CustomTestCase(TestCases):
+    def __init__(self, custom_testcase: str = None) -> None:
+        super().__init__(custom_testcase)
+
+    #the TestManager will automatically pass the function from the test file to this func parameter, so just call it as you want
+    #but if you use default/our test function, just define the test function, we will test it automatically
+    def test_Exercise_1(self):
+        return [
+            TestCase([], [1, 2], isIn=["3"])
+        ]
 
 def init_argparser():
     parser = argparse.ArgumentParser(description= "Scoring command line")
@@ -58,20 +56,30 @@ def init_argparser():
 if __name__ == "__main__":
     parser = init_argparser()
     args = parser.parse_args()
+    args.exercise_dir = args.exercise_dir.strip('"')
     
     if (not os.path.exists(args.exercise_dir)):
         print(f"Not found {args.exercise_dir}")
     else:
-        print(f"Loading all submissions from {args.exercise_dir} ...")
-        load_all_submissions(args.exercise_dir)
+        submission_manager = SubmissionManager(args.exercise_dir)
+        # testcase = TestCaseBase()
+        # submission_manager.attachTestcase(testcase)
 
-        print("Scoring...")
-        for submission_name, submission in submission_list.items():
-            scoring_submission(submission_name, submission["path"])
         
-        print("Saving  result...")
-        json.dump(submission_list, open("scoring table.json", "w"), indent=3)
+        # submission_manager.runTest()
+        # testcases = TestCases(args.test_cases)
+        # test_result = testcases.run()
+        # print(test_result)
+        # unittest.main()
+        
 
-        print("Done!!!")
-        for submission_name, submission in submission_list.items():
-            print(submission_name, submission)
+        # print("Scoring...")
+        # for submission_name, submission in submission_list.items():
+        #     scoring_submission(submission_name, submission["path"])
+        
+        # print("Saving  result...")
+        # json.dump(submission_list, open("scoring table.json", "w"), indent=3)
+
+        # print("Done!!!")
+        # for submission_name, submission in submission_list.items():
+        #     print(submission_name, submission)
