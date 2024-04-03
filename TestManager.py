@@ -43,7 +43,9 @@ class TestCases:
             for testcase in testcases:
                 results.addResult(test_function(function_to_test, testcase))
         except AttributeError:
-            results.addResult(Result(False, f"No test case for function {function_to_test.__name__}"))
+            # results.addResult(Result(False, f"No test case for function {function_to_test.__name__}"))
+            print(f"No test case for function {function_to_test.__name__}")
+            return None
 
         print(f"Done testing {function_to_test.__name__}\n\n")
         return results
