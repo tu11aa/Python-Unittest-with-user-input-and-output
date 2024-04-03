@@ -30,7 +30,14 @@ class SubmissionManager:
     def save_test_results(self, result_dir: str = "Result"):
         if not os.path.exists(result_dir):
             os.makedirs(result_dir)
+
+        summary = {}
         for submission in self.submissions.values():
             result_path = os.path.join(result_dir, submission.name + ".json")
             with open(result_path, "w") as f:
                 json.dump(submission.__dict__, f, indent=3)
+
+            summary[submission.name] = submission.score
+
+        with open(os.path.join(result_dir, "Summary.json"), "w") as f:
+            json.dump(summary, f, indent=3, sort_keys=True)
