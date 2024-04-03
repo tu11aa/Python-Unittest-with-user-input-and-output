@@ -1,5 +1,4 @@
 import os
-from io_unittest import scoring_qa
 import argparse
 from SubmissionManager import SubmissionManager
 from TestManager import TestManager, TestCases, TestCase
