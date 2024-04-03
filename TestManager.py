@@ -4,12 +4,13 @@ from unittest import mock
 from io import StringIO
 
 class TestCase:
-    def __init__(self, args: list, inputs: list, isEqual = None, isTrue: bool = None, isIn: list = None) -> None:
+    def __init__(self, args: list, inputs: list, isEqual = None, isTrue: bool = None, isIn: list = None, isContain: list = None) -> None:
         self.args = args
         self.inputs = inputs
         self.isEqual = isEqual
         self.isTrue = isTrue
         self.isIn = isIn
+        self.isContain = isContain
 
 class TestCases:
     """
@@ -27,8 +28,15 @@ class TestCases:
             raise Exception("This is abstract class")
 
     def runTest(self, function_to_test, test_function):
-        print(f"\nTesting {function_to_test.__name__} ...")
+        if not callable(function_to_test):
+            print(f"{function_to_test} is not a function to test")
+            return None
+        if not callable(test_function):
+            print(f"{test_function} is not a test function")
+            return None
+
         results = TestResult(function_to_test.__name__)
+        print(f"Testing {function_to_test.__name__} ...")
         try:
             testcases = getattr(self, f"test_{function_to_test.__name__}")()
             print("Test case: ", len(testcases))
@@ -36,6 +44,8 @@ class TestCases:
                 results.addResult(test_function(function_to_test, testcase))
         except AttributeError:
             results.addResult(Result(False, f"No test case for function {function_to_test.__name__}"))
+
+        print(f"Done testing {function_to_test.__name__}\n\n")
         return results
     
 class Result:
@@ -79,7 +89,7 @@ class TestManager:
                 function_to_test(*testcase.args)
                 actual_answer = mock_stdout.getvalue()
                 #checking required answer
-                if testcase.isTrue is None and testcase.isEqual is None and testcase.isIn is None:
+                if testcase.isTrue is None and testcase.isEqual is None and testcase.isIn is None and testcase.isContain is None:
                     return Result(True, "Warning: Empty testcase")
 
                 if (testcase.isTrue):
@@ -89,8 +99,13 @@ class TestManager:
                     if (str(answer) != actual_answer):
                         return Result(False, f"{answer} is not equal to {actual_answer}")
 
-                if (testcase.isIn):
-                    for answer in testcase.isIn:
+                # if (testcase.isIn):
+                #     for answer in testcase.isIn:
+                #         if (str(answer) not in actual_answer):
+                #             return Result(False, f"Not found {answer} in {actual_answer}")
+
+                if (testcase.isContain):
+                    for answer in testcase.isContain:
                         if (str(answer) not in actual_answer):
                             return Result(False, f"Not found {answer} in {actual_answer}")
                         
@@ -104,9 +119,12 @@ class TestManager:
 
         functions_to_test =  [function for function in self.module.__dir__() if not function.startswith("__")]
         
+        print(f"Running test on {test_path}")
         results = []
         for function in functions_to_test:
-            results.append(self.testcases.runTest(getattr(self.module, function), TestManager.test).__dict__)
+            result = self.testcases.runTest(getattr(self.module, function), TestManager.test)
+            if result:
+                results.append(result.__dict__)
 
         self._tearDown()
         return results
